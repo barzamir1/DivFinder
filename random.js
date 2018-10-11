@@ -29,20 +29,17 @@ export default class Random {
     returns a shuffled array of size len(dicArray) + len(paddLen)
      */
     static paddWithRandoms(num, divArray, finaleLength) {
-        let i, nonDivisor;
-        let numsToDisplay = Random.insertPrimes(divArray);
-        let arr = [];
-        for (i = 0; i < finaleLength-numsToDisplay.length; i++) {
+        let nonDivisor;
+        let numsToDisplay = new Set(divArray.concat([2,3,5,7,11])); //[2,3,5,7,1] will always be on display
+        while(numsToDisplay.size < finaleLength){
             nonDivisor = Random.randomInt(2, num);
-            while (numsToDisplay.includes(nonDivisor) || arr.includes(nonDivisor))
-                nonDivisor = Random.randomInt(2, num);
-            arr.push(nonDivisor);
+            numsToDisplay.add(nonDivisor);
         }
-        return Random.shuffle(numsToDisplay.concat(arr));
+        return Random.shuffle(Array.from(numsToDisplay));
     }
 
     /* receives array of numbers and inserts small primes if needed. */
-    static insertPrimes(array){
+/*    static insertPrimes(array){
         let i;
         let primes = [2,3,5,7,11], newArray=[];
         for(i=0; i<primes.length; i++){
@@ -50,5 +47,5 @@ export default class Random {
                 newArray.push(primes[i]);
         }
         return newArray.concat(array);
-    }
+    }*/
 }

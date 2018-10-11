@@ -10,7 +10,10 @@
     "@babel/runtime": "^7.1.2",
     "react": "16.5.0",
     "react-native": "0.57.1",
-    "react-native-countdown-circle": "^3.0.0",
+    "react-native-countdown-component": "^1.8.2",
+    "react-native-simple-radio-button": "^2.7.3",
+    "react-native-sqlite-storage": "^3.3.7",
+    "react-native-table-component": "^1.1.8",
     "react-transform-hmr": "^1.0.4"
   },
   "devDependencies": {

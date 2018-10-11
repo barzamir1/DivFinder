@@ -1,57 +1,61 @@
-import React, {Component} from 'react';
+import React from 'react';
 import Random from './random'
 
-const maxDivisorsToDisplay = 15; //the max number of divisor to display on the game board
-const  numberOfGameButtons = 21;
+const maxNumber = [50, 100, 500];
+
 export default class Game{
     constructor(level) {
-        this.maxButtons = 21;
+        this.maxButtons = 18;
         this.points = 0;
-//        if(level != 80 && level != 200 && level !=1000)
-//            level = 80;
         this.level = level;
-        this.prevNum = [];
-        this.num = Random.randomInt(numberOfGameButtons, this.level);
+        this.divSet = new Set();
+        this.prevNumSet = new Set();
+        this.num = Random.randomInt(this.maxButtons+1, maxNumber[this.level]);
         this.startRound();
     }
 
     startRound(){
-        while(this.prevNum.includes(this.num))
-            this.num = Random.randomInt(numberOfGameButtons, this.level);
+        if(this.prevNumSet.size == (maxNumber[this.level] - this.maxButtons)) {
+            return true; //game is over - no more numbers.
+        }
+        while(this.prevNumSet.has(this.num))
+            this.num = Random.randomInt(this.maxButtons+1, maxNumber[this.level]);
+        this.divSet.clear();
         this.findAllDivisors(this.num);
-        this.numOfDivsOnDisplay = (this.divArray.length <=maxDivisorsToDisplay) ? this.divArray.length : maxDivisorsToDisplay;
-        let slicedDivisors = Random.shuffle(this.divArray.slice(0,this.numOfDivsOnDisplay)); //choose x random divisors, x<=maxDivisorsToDisplay
-        this.numbersToDisplay = Random.paddWithRandoms(this.num, slicedDivisors, numberOfGameButtons); //array of divisors and non-divisors
+
+        for(let item in this.divSet){
+            if(this.divSet.size > this.maxButtons)
+                this.divSet.delete(item);
+        }
+        this.numbersToDisplay = Random.paddWithRandoms(this.num, Array.from(this.divSet), this.maxButtons); //array of divisors and non-divisors
 
         this.numbersDict = {}; //maps divisor to a dictionary div:{enabled, badlySelected}
         for(let i=0; i<this.numbersToDisplay.length; i++){
             let currDiv = this.numbersToDisplay[i];
             this.numbersDict[currDiv] = {disabled: false, badlySelected: false};
         }
+        return false; //game isn't over
     }
 
-    //sets this.divArray
+    //sets this.divSet
     findAllDivisors(num){
         let i;
-        let lst = []
         for(i=2; i <= Math.ceil(Math.sqrt(num)); i++){
             if(num%i == 0){
-                if(num/i == i)
-                    lst = lst.concat([i]);
-                else
-                    lst = lst.concat([i, num/i]);
+                this.divSet.add(i);
+                this.divSet.add(num/i);
             }
         }
-        this.divArray = lst.concat([num]); // num | num
+        this.divSet.add(num);  // num | num
     }
 
     handleSelectedDiv(selectedNum){
         this.numbersDict[selectedNum].disabled = true;
         if(this.num%selectedNum == 0){
             this.points++;
-            this.numOfDivsOnDisplay--;
-            if(this.numOfDivsOnDisplay == 0) { //found all divisors on the board
-                this.prevNum.push(this.num);
+            this.divSet.delete(selectedNum);
+            if(this.divSet.size == 0) { //found all divisors on the board
+                this.prevNumSet.add(this.num);
                 return true; //current round is over
             }
         }
@@ -61,11 +65,20 @@ export default class Game{
         }
         return false; //current round isn't over
     }
+
+    getAvailableLevelsArray() {
+        return [
+            {label: 'easy  ', value: 0},
+            {label: 'hard  ', value: 1},
+            {label: 'extreme  ', value: 2}
+        ];
+    }
+
     toString() {
         return (
-            'num: ' + this.num.toString() + ' divList: ' + this.divArray.toString() +
+            'num: ' + this.num.toString() + ' divList: ' + this.divSet.toString() +
             'numbers to display: ' + this.numbersToDisplay.toString() + ' #divisors: ' +
-            this.numOfDivsOnDisplay
+            this.divSet.size.toString()
         );
     }
 }
